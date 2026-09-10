@@ -1,7 +1,6 @@
 package com.studyboard.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studyboard.dto.ChatMessageDto;
 import com.studyboard.dto.SummaryResponse;
 import com.studyboard.entity.Summary;
@@ -15,17 +14,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * Calls an external AI API (Anthropic Messages API by default) to summarize
- * a room's chat transcript, then persists the result so it survives restarts.
- */
 @Service
 @RequiredArgsConstructor
 public class SummaryService {
 
     private final ChatService chatService;
     private final SummaryRepository summaryRepository;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${ai.api.key}")
     private String apiKey;
@@ -80,8 +74,7 @@ public class SummaryService {
 
         WebClient client = WebClient.builder()
                 .baseUrl(apiUrl)
-                .defaultHeader("x-api-key", apiKey)
-                .defaultHeader("anthropic-version", "2023-06-01")
+                .defaultHeader("Authorization", "Bearer " + apiKey)
                 .defaultHeader("content-type", "application/json")
                 .build();
 
@@ -100,16 +93,10 @@ public class SummaryService {
                 .bodyToMono(JsonNode.class)
                 .block();
 
-        if (response == null || !response.has("content")) {
+        if (response == null || !response.has("choices") || response.get("choices").isEmpty()) {
             throw new RuntimeException("AI summarization API returned an unexpected response");
         }
 
-        StringBuilder text = new StringBuilder();
-        for (JsonNode block : response.get("content")) {
-            if (block.has("text")) {
-                text.append(block.get("text").asText());
-            }
-        }
-        return text.toString();
+        return response.get("choices").get(0).get("message").get("content").asText();
     }
 }
