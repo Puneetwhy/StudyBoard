@@ -1,0 +1,75 @@
+cat > /home/puneet/Desktop/studyboard/.gitignore << 'EOF'
+# =========================================================
+# Backend (Java / Maven / Spring Boot)
+# =========================================================
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/*.jar
+backend/*.war
+backend/*.class
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/bin/
+backend/out/
+
+# Local env vars / secrets — never commit real credentials
+backend/.env
+backend/*.env.local
+backend/application-local.properties
+backend/application-dev.properties
+
+# =========================================================
+# Frontend (Node / Vite / React)
+# =========================================================
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+
+# =========================================================
+# IDE / Editor
+# =========================================================
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+.history/
+
+# =========================================================
+# OS files
+# =========================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================================================
+# Logs / temp / misc
+# =========================================================
+*.log
+logs/
+*.tmp
+*.temp
+.cache/
+
+# =========================================================
+# Docker (local overrides only — Dockerfile itself IS committed)
+# =========================================================
+backend/docker-compose.override.yml
+
+# =========================================================
+# Never commit real secrets even if accidentally created locally
+# =========================================================
+*.pem
+*.key
+secrets.properties
+EOF
