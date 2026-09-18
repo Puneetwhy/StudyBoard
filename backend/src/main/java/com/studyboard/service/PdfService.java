@@ -25,18 +25,21 @@ import java.util.UUID;
 public class PdfService {
 
     public File generateNotesPdf(String title, String content) {
-        File file = newTempFile("notes");
-        try (PdfWriter writer = new PdfWriter(new FileOutputStream(file));
-             PdfDocument pdfDoc = new PdfDocument(writer);
-             Document document = new Document(pdfDoc, PageSize.A4)) {
+    File file = newTempFile("notes");
+    try (PdfWriter writer = new PdfWriter(new FileOutputStream(file));
+         PdfDocument pdfDoc = new PdfDocument(writer);
+         Document document = new Document(pdfDoc, PageSize.A4)) {
 
-            document.add(new Paragraph(title).setBold().setFontSize(18));
-            document.add(new Paragraph(content).setFontSize(12));
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to generate notes PDF: " + e.getMessage(), e);
-        }
-        return file;
+        String safeTitle = (title == null || title.isBlank()) ? "Untitled" : title;
+        String safeContent = (content == null || content.isBlank()) ? "(No content)" : content;
+
+        document.add(new Paragraph(safeTitle).setBold().setFontSize(18));
+        document.add(new Paragraph(safeContent).setFontSize(12));
+    } catch (Exception e) {
+        throw new RuntimeException("Failed to generate notes PDF: " + e.getMessage(), e);
     }
+    return file;
+}
 
     public File generateWhiteboardPdf(String imageBase64) {
         File file = newTempFile("whiteboard");
