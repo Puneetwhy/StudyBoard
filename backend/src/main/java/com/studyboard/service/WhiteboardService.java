@@ -3,7 +3,9 @@ package com.studyboard.service;
 import com.studyboard.entity.WhiteboardSnapshot;
 import com.studyboard.repository.WhiteboardSnapshotRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
@@ -13,13 +15,21 @@ public class WhiteboardService {
 
     private final WhiteboardSnapshotRepository snapshotRepository;
 
-    /** Persist the latest full board state so late joiners can restore it. */
+    @Transactional
     public void saveSnapshot(Long roomId, String boardData) {
-        WhiteboardSnapshot snapshot = snapshotRepository.findByRoomId(roomId)
-                .orElse(WhiteboardSnapshot.builder().roomId(roomId).build());
-        snapshot.setBoardData(boardData);
-        snapshot.setUpdatedAt(Instant.now());
-        snapshotRepository.save(snapshot);
+        try {
+            WhiteboardSnapshot snapshot = snapshotRepository.findByRoomId(roomId)
+                    .orElseGet(() -> WhiteboardSnapshot.builder().roomId(roomId).build());
+            snapshot.setBoardData(boardData);
+            snapshot.setUpdatedAt(Instant.now());
+            snapshotRepository.save(snapshot);
+        } catch (DataIntegrityViolationException e) {
+            snapshotRepository.findByRoomId(roomId).ifPresent(existing -> {
+                existing.setBoardData(boardData);
+                existing.setUpdatedAt(Instant.now());
+                snapshotRepository.save(existing);
+            });
+        }
     }
 
     public String getSnapshot(Long roomId) {
