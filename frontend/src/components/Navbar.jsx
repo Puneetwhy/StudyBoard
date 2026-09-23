@@ -93,9 +93,6 @@ export default function Navbar() {
                 <p className="max-w-[140px] truncate text-sm font-semibold text-slate-700">
                   {user.name}
                 </p>
-                <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400">
-                  Student
-                </p>
               </div>
             </div>
 
