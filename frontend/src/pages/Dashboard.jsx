@@ -5,40 +5,55 @@ import Navbar from '../components/Navbar';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+
   const [roomName, setRoomName] = useState('');
   const [joinCode, setJoinCode] = useState('');
   const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [loadingAction, setLoadingAction] = useState('');
 
   const handleCreate = async (e) => {
     e.preventDefault();
+
     if (!roomName.trim()) return;
-    setBusy(true);
+
+    setLoadingAction('create');
     setError('');
+
     try {
-      const { data } = await api.post('/api/rooms', { name: roomName.trim() });
+      const { data } = await api.post('/api/rooms', {
+        name: roomName.trim()
+      });
+
       navigate(`/room/${data.id}`);
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not create room.');
+      setError(
+        err.response?.data?.message || 'Could not create room.'
+      );
     } finally {
-      setBusy(false);
+      setLoadingAction('');
     }
   };
 
   const handleJoin = async (e) => {
     e.preventDefault();
+
     if (!joinCode.trim()) return;
-    setBusy(true);
+
+    setLoadingAction('join');
     setError('');
+
     try {
       const { data } = await api.post('/api/rooms/join', {
         joinCode: joinCode.trim().toUpperCase()
       });
+
       navigate(`/room/${data.id}`);
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not join room.');
+      setError(
+        err.response?.data?.message || 'Could not join room.'
+      );
     } finally {
-      setBusy(false);
+      setLoadingAction('');
     }
   };
 
@@ -186,7 +201,8 @@ export default function Dashboard() {
                       value={roomName}
                       onChange={(e) => setRoomName(e.target.value)}
                       placeholder="e.g. Java DSA Study Group"
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3.5 text-sm text-slate-800 outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-300 focus:border-indigo-400 focus:bg-white focus:ring-4 focus:ring-indigo-100"
+                      disabled={loadingAction !== ''}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3.5 text-sm text-slate-800 outline-none transition-all duration-200 placeholder:text-slate-400 hover:border-slate-300 focus:border-indigo-400 focus:bg-white focus:ring-4 focus:ring-indigo-100 disabled:cursor-not-allowed disabled:opacity-70"
                     />
                   </div>
                 </div>
@@ -194,10 +210,10 @@ export default function Dashboard() {
                 {/* Button */}
                 <button
                   type="submit"
-                  disabled={busy}
+                  disabled={loadingAction !== ''}
                   className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-200/70 transition-all duration-200 hover:-translate-y-0.5 hover:from-indigo-500 hover:to-violet-500 hover:shadow-xl hover:shadow-indigo-200 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
                 >
-                  {busy ? (
+                  {loadingAction === 'create' ? (
                     <>
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                       Creating...
@@ -283,17 +299,18 @@ export default function Dashboard() {
                     value={joinCode}
                     onChange={(e) => setJoinCode(e.target.value)}
                     placeholder="Enter your room code"
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3.5 text-sm font-semibold tracking-[0.18em] text-slate-800 uppercase outline-none transition-all duration-200 placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400 hover:border-slate-300 focus:border-slate-500 focus:bg-white focus:ring-4 focus:ring-slate-100"
+                    disabled={loadingAction !== ''}
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3.5 text-sm font-semibold tracking-[0.18em] text-slate-800 uppercase outline-none transition-all duration-200 placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400 hover:border-slate-300 focus:border-slate-500 focus:bg-white focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:opacity-70"
                   />
                 </div>
 
                 {/* Button */}
                 <button
                   type="submit"
-                  disabled={busy}
+                  disabled={loadingAction !== ''}
                   className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-slate-200 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-xl hover:shadow-slate-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
                 >
-                  {busy ? (
+                  {loadingAction === 'join' ? (
                     <>
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                       Joining...
@@ -304,7 +321,7 @@ export default function Dashboard() {
 
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
+                        className="h-4 w-4 transition-transform duration-200"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
